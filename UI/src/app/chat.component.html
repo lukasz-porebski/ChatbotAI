@@ -1,17 +1,19 @@
 <div class="chat-container">
-  <div *ngFor="let msg of history">
-    <mat-card [ngClass]="msg.isUser ? 'user' : 'bot'">
-      <pre>{{ msg.text }}</pre>
-      <div *ngIf="!msg.isUser">
-        <button mat-icon-button (click)="toggleLike(msg)">
-          <mat-icon>{{ msg.isLiked? 'thumb_up':'thumb_up_off_alt' }}</mat-icon>
-        </button>
-        <button mat-icon-button (click)="toggleDislike(msg)">
-          <mat-icon>{{ msg.isLiked===false?'thumb_down':'thumb_down_off_alt' }}</mat-icon>
-        </button>
-      </div>
-    </mat-card>
-  </div>
+  @for (msg of history; track msg.id) {
+    <div>
+      <mat-card [ngClass]="msg.isUser ? 'user' : 'bot'">
+        <p>{{ msg.Text }}</p>
+        <div *ngIf="!msg.isUser">
+          <button mat-icon-button (click)="toggleLike(msg)">
+            <mat-icon>{{ msg.isLiked ? 'thumb_up' : 'thumb_up_off_alt' }}</mat-icon>
+          </button>
+          <button mat-icon-button (click)="toggleDislike(msg)">
+            <mat-icon>{{ msg.isLiked === false ? 'thumb_down' : 'thumb_down_off_alt' }}</mat-icon>
+          </button>
+        </div>
+      </mat-card>
+    </div>
+  }
   <textarea [(ngModel)]="prompt"></textarea>
   <button mat-raised-button (click)="send()">Wyślij</button>
   <button mat-button *ngIf="streamSub" (click)="cancel()">Anuluj</button>

@@ -1,12 +1,32 @@
 import { Subscription } from 'rxjs';
 import { ChatService } from './chat.service';
 import { ChatMessage } from './chat-message.model';
-import { OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { NgClass, NgIf } from '@angular/common';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { FormsModule } from '@angular/forms';
+import { MatCard } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
 
+@Component({
+  selector: 'app-root',
+  imports: [
+    NgIf,
+    MatButton,
+    FormsModule,
+    MatCard,
+    NgClass,
+    MatIcon,
+    MatIconButton
+  ],
+  providers: [ ChatService ],
+  templateUrl: './chat.component.html',
+  styleUrl: './chat.component.scss'
+})
 export class ChatComponent implements OnInit {
   history: ChatMessage[] = [];
   prompt = '';
-  streamSub: Subscription;
+  streamSub?: Subscription;
 
   constructor(private svc: ChatService) {
   }
@@ -25,14 +45,14 @@ export class ChatComponent implements OnInit {
         // usuń fragmenty starsze o tym samym Id
         this.history = this.history.filter(m => m.id !== msg.id);
         this.history.push(msg);
-      }, complete: () => this.streamSub = null
+      }, complete: () => this.streamSub = undefined
     });
     this.prompt = '';
   }
 
   cancel() {
-    this.streamSub.unsubscribe();
-    this.streamSub = null;
+    this.streamSub?.unsubscribe();
+    this.streamSub = undefined;
   }
 
   toggleLike(msg: ChatMessage) {

@@ -3,23 +3,59 @@ import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-@Injectable({providedIn: 'root'})
+interface StreamChatRequest {
+  prompt: string;
+}
+
+
+@Injectable()
 export class ChatService {
-  private base = '/api/chat';
+  private base = 'https://localhost:7202/api/chat';
 
   constructor(private http: HttpClient) {
   }
 
   stream(prompt: string): Observable<ChatMessage> {
-    return new Observable(sub => {
-      const req = this.http.post(`${this.base}/stream`, {prompt}, {responseType: 'text', observe: 'body'});
-      const subReq = req.subscribe({
-        next: chunk => {
-          const parts = chunk.split(/^data: /gm);
-          parts.forEach(p => p && sub.next(JSON.parse(p)));
-        }, error: e => sub.error(e), complete: () => sub.complete()
-      });
-      return () => subReq.unsubscribe();
+    return new Observable<ChatMessage>(observer => {
+      const controller = new AbortController();
+
+      fetch(`${this.base}/stream`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({prompt} as StreamChatRequest),
+        signal: controller.signal
+      })
+        .then(response => {
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const reader = response.body!.getReader();
+          const decoder = new TextDecoder();
+
+          const read = (): void => {
+            reader.read().then(({done, value}) => {
+              if (done) {
+                observer.complete();
+                return;
+              }
+              const text = decoder.decode(value, {stream: true});
+              text.split('\n\n').forEach(block => {
+                if (block.startsWith('data:')) {
+                  try {
+                    const msg: ChatMessage = JSON.parse(block.substring(5));
+                    observer.next(msg);
+                  } catch {
+                    // ignoruj nie-JSON-owe kawałki
+                  }
+                }
+              });
+              read();
+            }).catch(err => observer.error(err));
+          };
+
+          read();
+        })
+        .catch(err => observer.error(err));
+
+      return () => controller.abort();
     });
   }
 
