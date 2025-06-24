@@ -8,7 +8,7 @@ builder.Services.AddDbContext<ChatDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // 2. Dodaj MediatR (skanuje bieżązy assembly)
-builder.Services.AddMediatR(configuration => {});
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
 
 // 3. Dodaj kontrolery
 builder.Services.AddControllers();
@@ -25,6 +25,7 @@ builder.Services.AddCors(options =>
 // 5. Swagger (dla testów i dokumentacji)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddDbContext<ChatDbContext>();
 
 var app = builder.Build();
 

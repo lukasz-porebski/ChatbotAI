@@ -7,7 +7,7 @@ public class ChatDbContext : DbContext
 {
     public DbSet<ChatMessage> ChatMessages { get; set; }
 
-    public ChatDbContext(DbContextOptions options) : base(options) {}
+    public ChatDbContext(DbContextOptions<ChatDbContext> options) : base(options) {}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

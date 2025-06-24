@@ -19,15 +19,18 @@ public class ChatController : ControllerBase
         return Ok(all);
     }
 
-    [HttpPost("stream")]    
-    public async Task Stream([FromBody] StreamChatRequest req, CancellationToken ct)
+    [HttpPost("stream")]
+    public async Task Stream([FromBody] StreamChatRequest request, CancellationToken ct)
     {
-        Response.ContentType = "text/event-stream";
-        await foreach (var msg in _mediator.CreateStream(req, ct))
+        Response.Headers.Append("Content-Type", "text/event-stream");
+        
+        await foreach (var chunk in _mediator.CreateStream(request, ct))
         {
-            var json = JsonSerializer.Serialize(msg);
-            await Response.WriteAsync($"data: {json}\n\n", ct);
+            var json = JsonSerializer.Serialize(chunk);
+            await Response.WriteAsync($"data:{json}\n\n", ct);
             await Response.Body.FlushAsync(ct);
+
+            await Task.Delay(30, ct);
         }
     }
 
