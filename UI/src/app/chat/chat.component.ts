@@ -9,6 +9,7 @@ import { isDefined } from '../shared/utils';
 import { ChatMessageViewModel } from './models/views/chat-message-view.model';
 import { ChatMessageComponent } from './components/chat-message/chat-message.component';
 import { Optional } from '../shared/types/optional.type';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +20,8 @@ import { Optional } from '../shared/types/optional.type';
     MatInput,
     CdkTextareaAutosize,
     MatFormField,
-    ChatMessageComponent
+    ChatMessageComponent,
+    MatProgressSpinner
   ],
   providers: [ ChatAPIService ],
   templateUrl: './chat.component.html',
@@ -30,6 +32,7 @@ export class ChatComponent implements OnInit {
     return isDefined(this._streamSub);
   }
 
+  public isInitialized = false;
   public history: ChatMessageViewModel[] = [];
   public generatedAnswer: Optional<ChatMessageViewModel>;
   public prompt = '';
@@ -40,7 +43,10 @@ export class ChatComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    this._apiService.getHistory().subscribe(history => this.history = history);
+    this._apiService.getHistory().subscribe(history => {
+      this.history = history
+      this.isInitialized = true
+    });
   }
 
   public send(): void {
