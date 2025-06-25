@@ -1,6 +1,6 @@
 import { Subscription } from 'rxjs';
 import { ChatAPIService } from './chat-api.service';
-import { Component, OnInit } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, OnInit, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatInput } from '@angular/material/input';
@@ -27,7 +27,9 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
 })
-export class ChatComponent implements OnInit {
+export class ChatComponent implements OnInit, AfterViewChecked {
+  public messagesContainer = viewChild.required<ElementRef>('messagesContainer');
+
   public get isSending(): boolean {
     return isDefined(this._streamSub);
   }
@@ -47,6 +49,10 @@ export class ChatComponent implements OnInit {
       this.history = history
       this.isInitialized = true
     });
+  }
+
+  public ngAfterViewChecked(): void {
+    this._scrollMessagesContainerToBottom();
   }
 
   public send(): void {
@@ -79,5 +85,10 @@ export class ChatComponent implements OnInit {
         this.generatedAnswer = undefined;
       });
     }
+  }
+
+  private _scrollMessagesContainerToBottom(): void {
+    const element = this.messagesContainer().nativeElement;
+    element.scrollTop = element.scrollHeight;
   }
 }

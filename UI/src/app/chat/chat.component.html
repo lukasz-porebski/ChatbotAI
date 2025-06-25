@@ -4,7 +4,7 @@
       <mat-spinner></mat-spinner>
     </div>
   } @else {
-    <div class="messages-container">
+    <div class="messages-container" #messagesContainer>
       @for (message of history; track message.id) {
         <app-chat-message [message]="message"></app-chat-message>
       }
