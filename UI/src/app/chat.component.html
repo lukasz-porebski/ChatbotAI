@@ -1,20 +1,38 @@
-<div class="chat-container">
+<div>
   @for (msg of history; track msg.id) {
-    <div>
-      <mat-card [ngClass]="msg.isUser ? 'user' : 'bot'">
-        <p>{{ msg.Text }}</p>
-        <div *ngIf="!msg.isUser">
-          <button mat-icon-button (click)="toggleLike(msg)">
-            <mat-icon>{{ msg.isLiked ? 'thumb_up' : 'thumb_up_off_alt' }}</mat-icon>
-          </button>
-          <button mat-icon-button (click)="toggleDislike(msg)">
-            <mat-icon>{{ msg.isLiked === false ? 'thumb_down' : 'thumb_down_off_alt' }}</mat-icon>
-          </button>
-        </div>
+    <div class="message">
+      <mat-card class="example-card" appearance="outlined" [class.user-prompt]="msg.isUser">
+        <mat-card-content>
+          <p>
+            {{ msg.text }}
+          </p>
+        </mat-card-content>
+        @if (!msg.isUser) {
+          <mat-card-actions>
+            <button matIconButton (click)="toggleLike(msg)">
+              <mat-icon [class.liked]="msg.isLiked">thumb_up</mat-icon>
+            </button>
+            <button matIconButton (click)="toggleDislike(msg)">
+              <mat-icon [class.disliked]="msg.isLiked === false">thumb_down</mat-icon>
+            </button>
+          </mat-card-actions>
+        }
       </mat-card>
     </div>
   }
-  <textarea [(ngModel)]="prompt"></textarea>
-  <button mat-raised-button (click)="send()">Wyślij</button>
-  <button mat-button *ngIf="streamSub" (click)="cancel()">Anuluj</button>
+</div>
+<div>
+  <mat-form-field class="input">
+    <textarea matInput cdkTextareaAutosize placeholder="Zapytaj o cokolwiek" [(ngModel)]="prompt"></textarea>
+  </mat-form-field>
+  @if (!isSending) {
+    <button matIconButton class="send-stop" (click)="send()">
+      <mat-icon [class.liked]="isLiked">arrow_upward</mat-icon>
+    </button>
+  }
+  @if (isSending) {
+    <button matIconButton class="send-stop" (click)="cancel()">
+      <mat-icon [class.liked]="isLiked">stop_circle</mat-icon>
+    </button>
+  }
 </div>

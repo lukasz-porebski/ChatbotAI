@@ -1,46 +1,50 @@
 import { Subscription } from 'rxjs';
 import { ChatService } from './chat.service';
-import { ChatMessage } from './chat-message.model';
+import { ChatMessageViewModel } from './models/views/chat-message-view.model';
 import { Component, OnInit } from '@angular/core';
-import { NgClass, NgIf } from '@angular/common';
-import { MatButton, MatIconButton } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
-import { MatCard } from '@angular/material/card';
+import { MatCard, MatCardActions, MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatInput } from '@angular/material/input';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 
 @Component({
   selector: 'app-root',
   imports: [
-    NgIf,
-    MatButton,
     FormsModule,
     MatCard,
-    NgClass,
     MatIcon,
-    MatIconButton
+    MatCardContent,
+    MatCardActions,
+    MatFormField,
+    MatInput,
+    CdkTextareaAutosize,
+    MatFormField
   ],
   providers: [ ChatService ],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
 })
 export class ChatComponent implements OnInit {
-  history: ChatMessage[] = [];
+  history: ChatMessageViewModel[] = [];
   prompt = '';
   streamSub?: Subscription;
+  public isLiked?: boolean = false;
+  public isSending: boolean = false;
 
-  constructor(private svc: ChatService) {
+  public constructor(private svc: ChatService) {
   }
 
-  ngOnInit() {
+  public ngOnInit(): void {
     this.loadHistory();
   }
 
-  loadHistory() {
+  public loadHistory(): void {
     this.svc.getHistory().subscribe(h => this.history = h);
   }
 
-  send() {
-    this.streamSub = this.svc.stream(this.prompt).subscribe({
+  public send(): void {
+    this.streamSub = this.svc.generateAnswer(this.prompt).subscribe({
       next: msg => {
         // usuń fragmenty starsze o tym samym Id
         this.history = this.history.filter(m => m.id !== msg.id);
@@ -50,20 +54,20 @@ export class ChatComponent implements OnInit {
     this.prompt = '';
   }
 
-  cancel() {
+  public cancel(): void {
     this.streamSub?.unsubscribe();
     this.streamSub = undefined;
   }
 
-  toggleLike(msg: ChatMessage) {
-    this.rate(msg, true);
+  public toggleLike(msg: ChatMessageViewModel): void {
+    this.rate(msg, msg.isLiked ? undefined : true);
   }
 
-  toggleDislike(msg: ChatMessage) {
-    this.rate(msg, false);
+  public toggleDislike(msg: ChatMessageViewModel): void {
+    this.rate(msg, msg.isLiked === false ? undefined : false);
   }
 
-  private rate(msg: ChatMessage, like: boolean) {
+  private rate(msg: ChatMessageViewModel, like?: boolean): void {
     this.svc.rate(msg.id, like).subscribe(() => msg.isLiked = like);
   }
 }
