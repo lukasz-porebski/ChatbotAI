@@ -1,6 +1,13 @@
 import { Subscription } from 'rxjs';
 import { ChatAPIService } from './chat-api.service';
-import { AfterViewChecked, Component, ElementRef, OnInit, viewChild } from '@angular/core';
+import {
+  AfterViewChecked,
+  Component,
+  ElementRef,
+  inject,
+  OnInit,
+  viewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatInput } from '@angular/material/input';
@@ -21,14 +28,15 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
     CdkTextareaAutosize,
     MatFormField,
     ChatMessageComponent,
-    MatProgressSpinner
+    MatProgressSpinner,
   ],
-  providers: [ ChatAPIService ],
+  providers: [ChatAPIService],
   templateUrl: './chat.component.html',
-  styleUrl: './chat.component.scss'
+  styleUrl: './chat.component.scss',
 })
 export class ChatComponent implements OnInit, AfterViewChecked {
-  public messagesContainer = viewChild.required<ElementRef>('messagesContainer');
+  public messagesContainer =
+    viewChild.required<ElementRef>('messagesContainer');
 
   public get isSending(): boolean {
     return isDefined(this._streamSub);
@@ -39,15 +47,14 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   public generatedAnswer: Optional<ChatMessageViewModel>;
   public prompt = '';
 
+  private readonly _apiService = inject(ChatAPIService);
+
   private _streamSub: Optional<Subscription>;
 
-  public constructor(private readonly _apiService: ChatAPIService) {
-  }
-
   public ngOnInit(): void {
-    this._apiService.getHistory().subscribe(history => {
-      this.history = history
-      this.isInitialized = true
+    this._apiService.getHistory().subscribe((history) => {
+      this.history = history;
+      this.isInitialized = true;
     });
   }
 
@@ -56,34 +63,45 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   }
 
   public send(): void {
-    this._apiService.addMessage(null, true, this.prompt).subscribe((message) => {
-      this.history.push(message);
+    this._apiService
+      .addMessage(null, true, this.prompt)
+      .subscribe((message) => {
+        this.history.push(message);
 
-      this._streamSub = this._apiService.generateAnswer(this.prompt).subscribe({
-        next: msg => {
-          this.generatedAnswer = msg;
-        }, complete: () => {
-          this._streamSub = undefined
-          this._apiService.addMessage(
-            this.generatedAnswer!.id, false, this.generatedAnswer!.text).subscribe(() => {
-            this.history.push(this.generatedAnswer!);
-            this.generatedAnswer = undefined;
+        this._streamSub = this._apiService
+          .generateAnswer(this.prompt)
+          .subscribe({
+            next: (msg) => {
+              this.generatedAnswer = msg;
+            },
+            complete: () => {
+              this._streamSub = undefined;
+              this._apiService
+                .addMessage(
+                  this.generatedAnswer!.id,
+                  false,
+                  this.generatedAnswer!.text,
+                )
+                .subscribe(() => {
+                  this.history.push(this.generatedAnswer!);
+                  this.generatedAnswer = undefined;
+                });
+            },
           });
-        }
+        this.prompt = '';
       });
-      this.prompt = '';
-    })
   }
 
   public cancel(): void {
     if (isDefined(this._streamSub)) {
       this._streamSub.unsubscribe();
       this._streamSub = undefined;
-      this._apiService.addMessage(
-        this.generatedAnswer!.id, false, this.generatedAnswer!.text).subscribe(() => {
-        this.history.push(this.generatedAnswer!);
-        this.generatedAnswer = undefined;
-      });
+      this._apiService
+        .addMessage(this.generatedAnswer!.id, false, this.generatedAnswer!.text)
+        .subscribe(() => {
+          this.history.push(this.generatedAnswer!);
+          this.generatedAnswer = undefined;
+        });
     }
   }
 

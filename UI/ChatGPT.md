@@ -5,29 +5,31 @@ W pliku `chat.model.ts` definiujemy interfejs wiadomości dopasowany do backendu
 ```ts
 export interface ChatMessage {
   id: string;
-  isUser: boolean;      // true jeśli wiadomość od użytkownika, false jeśli od bota
+  isUser: boolean; // true jeśli wiadomość od użytkownika, false jeśli od bota
   text: string;
-  timestamp: string;    // ISO 8601 UTC
-  isLiked?: boolean;    // null lub niezdefiniowany jeśli brak oceny
+  timestamp: string; // ISO 8601 UTC
+  isLiked?: boolean; // null lub niezdefiniowany jeśli brak oceny
 }
 ```
 
 ### 2. ChatService (streaming + anulowanie) (streaming + anulowanie)
 
 ```ts
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class ChatService {
-  private base = '/api/chat';
+  private base = "/api/chat";
   constructor(private http: HttpClient) {}
 
   stream(prompt: string): Observable<ChatMessage> {
-    return new Observable(sub => {
-      const req = this.http.post(`${this.base}/stream`, { prompt }, { responseType: 'text', observe: 'body' });
+    return new Observable((sub) => {
+      const req = this.http.post(`${this.base}/stream`, { prompt }, { responseType: "text", observe: "body" });
       const subReq = req.subscribe({
-        next: chunk => {
+        next: (chunk) => {
           const parts = chunk.split(/^data: /gm);
-          parts.forEach(p => p && sub.next(JSON.parse(p)));
-        }, error: e => sub.error(e), complete: () => sub.complete()
+          parts.forEach((p) => p && sub.next(JSON.parse(p)));
+        },
+        error: (e) => sub.error(e),
+        complete: () => sub.complete(),
       });
       return () => subReq.unsubscribe();
     });
@@ -71,25 +73,28 @@ export class ChatService {
 ```ts
 export class ChatComponent implements OnInit {
   history: ChatMessage[] = [];
-  prompt = '';
+  prompt = "";
   streamSub: Subscription;
 
   constructor(private svc: ChatService) {}
-  ngOnInit() { this.loadHistory(); }
+  ngOnInit() {
+    this.loadHistory();
+  }
 
   loadHistory() {
-    this.svc.getHistory().subscribe(h => this.history = h);
+    this.svc.getHistory().subscribe((h) => (this.history = h));
   }
 
   send() {
     this.streamSub = this.svc.stream(this.prompt).subscribe({
-      next: msg => {
+      next: (msg) => {
         // usuń fragmenty starsze o tym samym Id
-        this.history = this.history.filter(m => m.id!==msg.id);
+        this.history = this.history.filter((m) => m.id !== msg.id);
         this.history.push(msg);
-      }, complete: () => this.streamSub = null
+      },
+      complete: () => (this.streamSub = null),
     });
-    this.prompt = '';
+    this.prompt = "";
   }
 
   cancel() {
@@ -97,10 +102,14 @@ export class ChatComponent implements OnInit {
     this.streamSub = null;
   }
 
-  toggleLike(msg: ChatMessage) { this.rate(msg, true); }
-  toggleDislike(msg: ChatMessage) { this.rate(msg, false); }
+  toggleLike(msg: ChatMessage) {
+    this.rate(msg, true);
+  }
+  toggleDislike(msg: ChatMessage) {
+    this.rate(msg, false);
+  }
   private rate(msg: ChatMessage, like: boolean) {
-    this.svc.rate(msg.id, like).subscribe(() => msg.isLiked = like);
+    this.svc.rate(msg.id, like).subscribe(() => (msg.isLiked = like));
   }
 }
 ```

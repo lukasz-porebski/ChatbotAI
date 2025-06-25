@@ -10,17 +10,21 @@
       }
 
       @if (generatedAnswer) {
-        <app-chat-message [message]="generatedAnswer" [hideButtons]="isSending"></app-chat-message>
+        <app-chat-message
+          [message]="generatedAnswer"
+          [hideButtons]="isSending"
+        ></app-chat-message>
       }
     </div>
     <div class="prompt-container">
       <mat-form-field class="input">
-    <textarea
-      matInput
-      cdkTextareaAutosize
-      placeholder="Zapytaj o cokolwiek"
-      [(ngModel)]="prompt">
-    </textarea>
+        <textarea
+          matInput
+          cdkTextareaAutosize
+          placeholder="Zapytaj o cokolwiek"
+          [(ngModel)]="prompt"
+        >
+        </textarea>
       </mat-form-field>
       @if (!isSending) {
         <button matIconButton class="send-stop" (click)="send()">

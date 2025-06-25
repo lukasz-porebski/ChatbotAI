@@ -1,4 +1,3 @@
 export class GenerateAnswerRequest {
-  public constructor(public readonly prompt: string) {
-  }
+  public constructor(public readonly prompt: string) {}
 }
