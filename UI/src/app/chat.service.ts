@@ -4,12 +4,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { GenerateAnswerRequest } from './models/requests/generate-answer-request.model';
 import { RateAnswerRequest } from './models/requests/rate-answer-request.model';
+import { AddMessageRequest } from './models/requests/add-message-request.model';
 
 @Injectable()
 export class ChatService {
   private _apiUrl = 'https://localhost:7202/api/chat';
 
-  constructor(private http: HttpClient) {
+  public constructor(private readonly _http: HttpClient) {
   }
 
   public generateAnswer(prompt: string): Observable<ChatMessageViewModel> {
@@ -59,10 +60,15 @@ export class ChatService {
   }
 
   public getHistory(): Observable<ChatMessageViewModel[]> {
-    return this.http.get<ChatMessageViewModel[]>(`${this._apiUrl}/history`);
+    return this._http.get<ChatMessageViewModel[]>(`${this._apiUrl}/history`);
   }
 
-  public rate(id: string, like?: boolean) {
-    return this.http.patch(`${this._apiUrl}/rate-answer`, new RateAnswerRequest(id, like));
+  public addMessage(isUser: boolean, text: string): Observable<ChatMessageViewModel> {
+    return this._http.post<ChatMessageViewModel>(
+      `${this._apiUrl}/add-message`, new AddMessageRequest(isUser, text));
+  }
+
+  public rate(id: string, like?: boolean): Observable<void> {
+    return this._http.patch<void>(`${this._apiUrl}/rate-answer`, new RateAnswerRequest(id, like));
   }
 }

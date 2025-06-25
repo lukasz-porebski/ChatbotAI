@@ -7,6 +7,7 @@ import { MatCard, MatCardActions, MatCardContent } from '@angular/material/card'
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatInput } from '@angular/material/input';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { isDefined } from './utils';
 
 @Component({
   selector: 'app-root',
@@ -26,13 +27,16 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
   styleUrl: './chat.component.scss'
 })
 export class ChatComponent implements OnInit {
-  history: ChatMessageViewModel[] = [];
-  prompt = '';
-  streamSub?: Subscription;
-  public isLiked?: boolean = false;
-  public isSending: boolean = false;
+  public get isSending(): boolean {
+    return isDefined(this._streamSub);
+  }
 
-  public constructor(private svc: ChatService) {
+  public history: ChatMessageViewModel[] = [];
+  public prompt = '';
+
+  private _streamSub?: Subscription;
+
+  public constructor(private apiService: ChatService) {
   }
 
   public ngOnInit(): void {
@@ -40,23 +44,32 @@ export class ChatComponent implements OnInit {
   }
 
   public loadHistory(): void {
-    this.svc.getHistory().subscribe(h => this.history = h);
+    this.apiService.getHistory().subscribe(h => this.history = h);
   }
 
   public send(): void {
-    this.streamSub = this.svc.generateAnswer(this.prompt).subscribe({
-      next: msg => {
-        // usuń fragmenty starsze o tym samym Id
-        this.history = this.history.filter(m => m.id !== msg.id);
-        this.history.push(msg);
-      }, complete: () => this.streamSub = undefined
-    });
-    this.prompt = '';
+    this.apiService.addMessage(true, this.prompt).subscribe((message) => {
+      this.history.push(message);
+
+      this._streamSub = this.apiService.generateAnswer(this.prompt).subscribe({
+        next: msg => {
+          this.history = this.history.filter(m => m.id !== msg.id);
+          this.history.push(msg);
+        }, complete: () => {
+          this._streamSub = undefined
+          this.apiService.addMessage(false, this.history[this.history.length - 1].text).subscribe();
+        }
+      });
+      this.prompt = '';
+    })
   }
 
   public cancel(): void {
-    this.streamSub?.unsubscribe();
-    this.streamSub = undefined;
+    if (isDefined(this._streamSub)) {
+      this._streamSub.unsubscribe();
+      this._streamSub = undefined;
+      this.apiService.addMessage(false, this.history[this.history.length - 1].text).subscribe();
+    }
   }
 
   public toggleLike(msg: ChatMessageViewModel): void {
@@ -68,6 +81,6 @@ export class ChatComponent implements OnInit {
   }
 
   private rate(msg: ChatMessageViewModel, like?: boolean): void {
-    this.svc.rate(msg.id, like).subscribe(() => msg.isLiked = like);
+    this.apiService.rate(msg.id, like).subscribe(() => msg.isLiked = like);
   }
 }

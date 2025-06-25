@@ -1,5 +1,6 @@
 using System.Text.Json;
 using ChatbotAI.Domain;
+using ChatbotAI.Handlers.AddMessage;
 using ChatbotAI.Handlers.GenerateAnswer;
 using ChatbotAI.Handlers.GetHistory;
 using ChatbotAI.Handlers.RateAnswer;
@@ -32,11 +33,17 @@ public class ChatController(IMediator mediator) : ControllerBase
         }
     }
 
+    [HttpPost("add-message")]
+    public async Task<IActionResult> AddMessage([FromBody] AddMessageRequest request, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(request, cancellationToken);
+        return Ok(result);
+    }
+
     [HttpPatch("rate-answer")]
-    public async Task<IActionResult> RateAnswer(
-        [FromBody] RateAnswerRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> RateAnswer([FromBody] RateAnswerRequest request, CancellationToken cancellationToken)
     {
         await mediator.Send(request, cancellationToken);
-        return NoContent();
+        return Ok();
     }
 }

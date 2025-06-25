@@ -2,7 +2,7 @@
 
 public class ChatMessage
 {
-    private ChatMessage(bool isUser, string text)
+    public ChatMessage(bool isUser, string text)
     {
         Id = Guid.NewGuid();
         IsUser = isUser;
@@ -20,12 +20,6 @@ public class ChatMessage
     public string Text { get; private set; }
     public DateTime Timestamp { get; private set; }
     public bool? IsLiked { get; private set; }
-
-    public static ChatMessage CreateForUser(string text) =>
-        new(true, text);
-
-    public static ChatMessage CreateForBot() =>
-        new(false, string.Empty);
 
     public void SetText(string text)
     {
