@@ -1,0 +1,21 @@
+<div class="message">
+  <div>
+    <mat-card class="example-card" appearance="outlined" [class.user-prompt]="message().isUser">
+      <mat-card-content>
+        <p>
+          {{ message().text }}
+        </p>
+      </mat-card-content>
+      @if (!message().isUser && !hideButtons()) {
+        <mat-card-actions>
+          <button matIconButton (click)="toggleLike(message())">
+            <mat-icon [class.liked]="message().isLiked">thumb_up</mat-icon>
+          </button>
+          <button matIconButton (click)="toggleDislike(message())">
+            <mat-icon [class.disliked]="message().isLiked === false">thumb_down</mat-icon>
+          </button>
+        </mat-card-actions>
+      }
+    </mat-card>
+  </div>
+</div>

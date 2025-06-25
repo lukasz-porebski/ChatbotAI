@@ -2,9 +2,9 @@
 
 public class ChatMessage
 {
-    public ChatMessage(bool isUser, string text)
+    public ChatMessage(Guid id, bool isUser, string text)
     {
-        Id = Guid.NewGuid();
+        Id = id;
         IsUser = isUser;
         Text = text;
         Timestamp = DateTime.UtcNow;

@@ -64,9 +64,9 @@ export class ChatAPIService {
     });
   }
 
-  public addMessage(isUser: boolean, text: string): Observable<ChatMessageViewModel> {
+  public addMessage(id: Optional<string>, isUser: boolean, text: string): Observable<ChatMessageViewModel> {
     return this._httpClient.post<ChatMessageViewModel>(
-      `${this._apiUrl}/add-message`, new AddMessageRequest(isUser, text));
+      `${this._apiUrl}/add-message`, new AddMessageRequest(id, isUser, text));
   }
 
   public rateAnswer(id: string, like: Optional<boolean>): Observable<void> {

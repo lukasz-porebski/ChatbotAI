@@ -1,17 +1,22 @@
-.example-card {
-  max-width: 70%;
-
-  p {
-    margin: 0;
-  }
+button {
+  //border: none;
+  //background: transparent;
 }
 
-.liked {
-  color: cornflowerblue;
+.chat-container {
+  width: 60%;
+  margin: 0 auto;
+  height: 100vh;
 }
 
-.disliked {
-  color: crimson;
+.messages-container {
+  height: 80%;
+  overflow: overlay;
+}
+
+.prompt-container {
+  height: 20%;
+  overflow: overlay;
 }
 
 .input {
@@ -20,13 +25,4 @@
 
 .send-stop {
   width: 10%;
-}
-
-.user-prompt {
-  float: right;
-}
-
-.message {
-  display: inline-block;
-  width: 100%;
 }

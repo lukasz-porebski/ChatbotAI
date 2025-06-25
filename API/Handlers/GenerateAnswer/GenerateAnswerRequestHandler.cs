@@ -16,7 +16,7 @@ public class GenerateAnswerRequestHandler(IChatbotAnswerGenerator chatbotAnswerG
         var stringBuilder = new StringBuilder();
 
         var answer = await chatbotAnswerGenerator.GenerateAsync(request.Prompt, cancellationToken);
-        var message = new ChatMessage(isUser: false, text: string.Empty);
+        var message = new ChatMessage(Guid.NewGuid(), isUser: false, text: string.Empty);
 
         foreach (var character in answer)
         {
