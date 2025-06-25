@@ -1,6 +1,9 @@
 <div class="message">
   <div>
-    <mat-card class="example-card" appearance="outlined" [class.user-prompt]="message().isUser">
+    <mat-card
+      class="example-card"
+      appearance="outlined"
+      [class.prompt]="message().isUser">
       <mat-card-content>
         <p>
           {{ message().text }}
