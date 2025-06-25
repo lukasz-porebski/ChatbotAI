@@ -2,11 +2,12 @@
 using System.Text;
 using ChatbotAI.Database;
 using ChatbotAI.Domain;
+using ChatbotAI.Domain.ChatbotAnswerGenerator;
 using MediatR;
 
 namespace ChatbotAI.Handlers.GenerateAnswer;
 
-public class GenerateAnswerRequestHandler(IChatbotAnswerProvider chatbotAnswerProvider)
+public class GenerateAnswerRequestHandler(IChatbotAnswerGenerator chatbotAnswerGenerator)
     : IStreamRequestHandler<GenerateAnswerRequest, ChatMessage>
 {
     public async IAsyncEnumerable<ChatMessage> Handle(
@@ -14,16 +15,16 @@ public class GenerateAnswerRequestHandler(IChatbotAnswerProvider chatbotAnswerPr
     {
         var stringBuilder = new StringBuilder();
 
-        var botAnswer = await chatbotAnswerProvider.GetAsync(request.Prompt, cancellationToken);
-        var botMessage = new ChatMessage(isUser: false, text: string.Empty);
+        var answer = await chatbotAnswerGenerator.GenerateAsync(request.Prompt, cancellationToken);
+        var message = new ChatMessage(isUser: false, text: string.Empty);
 
-        foreach (var character in botAnswer)
+        foreach (var character in answer)
         {
-            botMessage.SetText(stringBuilder.ToString());
+            message.SetText(stringBuilder.ToString());
             stringBuilder.Append(character);
 
             await Task.Delay(30, cancellationToken);
-            yield return botMessage;
+            yield return message;
         }
     }
 }

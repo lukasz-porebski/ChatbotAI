@@ -1,6 +1,6 @@
-﻿namespace ChatbotAI.Domain;
+﻿namespace ChatbotAI.Domain.ChatbotAnswerGenerator;
 
-public class ChatbotRandomAnswerGenerator : IChatbotAnswerProvider
+public class ChatbotRandomAnswerGenerator : IChatbotAnswerGenerator
 {
     private readonly Random _random = new();
 
@@ -18,7 +18,7 @@ public class ChatbotRandomAnswerGenerator : IChatbotAnswerProvider
         "Culpa qui officia deserunt mollit anim id est laborum."
     ];
 
-    public Task<string> GetAsync(string prompt, CancellationToken cancellationToken)
+    public Task<string> GenerateAsync(string prompt, CancellationToken cancellationToken)
     {
         var randomAnswerLength = Enum.GetValues<AnswerLength>()
             .OrderBy(_ => _random.Next())
