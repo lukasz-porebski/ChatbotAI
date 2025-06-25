@@ -1,4 +1,5 @@
-using ChatbotAI;
+using ChatbotAI.Database;
+using ChatbotAI.Domain;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +27,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ChatDbContext>();
+builder.Services.AddScoped<IChatbotAnswerProvider, ChatbotRandomAnswerGenerator>();
 
 var app = builder.Build();
 

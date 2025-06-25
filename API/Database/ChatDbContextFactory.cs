@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace ChatbotAI;
+namespace ChatbotAI.Database;
 
 public class ChatDbContextFactory : IDesignTimeDbContextFactory<ChatDbContext>
 {

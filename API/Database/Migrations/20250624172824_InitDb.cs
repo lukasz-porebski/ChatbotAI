@@ -1,9 +1,8 @@
-﻿using System;
+﻿#nullable disable
+
 using Microsoft.EntityFrameworkCore.Migrations;
 
-#nullable disable
-
-namespace ChatbotAI.Migrations
+namespace ChatbotAI.Database.Migrations
 {
     /// <inheritdoc />
     public partial class InitDb : Migration

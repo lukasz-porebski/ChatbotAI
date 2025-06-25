@@ -1,7 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ChatbotAI.Domain;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace ChatbotAI;
+namespace ChatbotAI.Database;
 
 public class ChatDbContext : DbContext
 {
