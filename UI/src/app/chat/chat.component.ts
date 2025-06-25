@@ -1,13 +1,14 @@
 import { Subscription } from 'rxjs';
-import { ChatService } from './chat.service';
-import { ChatMessageViewModel } from './models/views/chat-message-view.model';
+import { ChatAPIService } from './chat-api.service';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatCard, MatCardActions, MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatInput } from '@angular/material/input';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
-import { isDefined } from './utils';
+import { isDefined } from '../shared/utils';
+import { ChatMessageViewModel } from './models/views/chat-message-view.model';
+import { Optional } from '../shared/types/optional.type';
 
 @Component({
   selector: 'app-root',
@@ -22,7 +23,7 @@ import { isDefined } from './utils';
     CdkTextareaAutosize,
     MatFormField
   ],
-  providers: [ ChatService ],
+  providers: [ ChatAPIService ],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
 })
@@ -36,28 +37,24 @@ export class ChatComponent implements OnInit {
 
   private _streamSub?: Subscription;
 
-  public constructor(private apiService: ChatService) {
+  public constructor(private readonly _apiService: ChatAPIService) {
   }
 
   public ngOnInit(): void {
-    this.loadHistory();
-  }
-
-  public loadHistory(): void {
-    this.apiService.getHistory().subscribe(h => this.history = h);
+    this._apiService.getHistory().subscribe(history => this.history = history);
   }
 
   public send(): void {
-    this.apiService.addMessage(true, this.prompt).subscribe((message) => {
+    this._apiService.addMessage(true, this.prompt).subscribe((message) => {
       this.history.push(message);
 
-      this._streamSub = this.apiService.generateAnswer(this.prompt).subscribe({
+      this._streamSub = this._apiService.generateAnswer(this.prompt).subscribe({
         next: msg => {
           this.history = this.history.filter(m => m.id !== msg.id);
           this.history.push(msg);
         }, complete: () => {
           this._streamSub = undefined
-          this.apiService.addMessage(false, this.history[this.history.length - 1].text).subscribe();
+          this._apiService.addMessage(false, this.history[this.history.length - 1].text).subscribe();
         }
       });
       this.prompt = '';
@@ -68,19 +65,19 @@ export class ChatComponent implements OnInit {
     if (isDefined(this._streamSub)) {
       this._streamSub.unsubscribe();
       this._streamSub = undefined;
-      this.apiService.addMessage(false, this.history[this.history.length - 1].text).subscribe();
+      this._apiService.addMessage(false, this.history[this.history.length - 1].text).subscribe();
     }
   }
 
-  public toggleLike(msg: ChatMessageViewModel): void {
-    this.rate(msg, msg.isLiked ? undefined : true);
+  public toggleLike(answer: ChatMessageViewModel): void {
+    this._rateAnswer(answer, answer.isLiked ? undefined : true);
   }
 
-  public toggleDislike(msg: ChatMessageViewModel): void {
-    this.rate(msg, msg.isLiked === false ? undefined : false);
+  public toggleDislike(answer: ChatMessageViewModel): void {
+    this._rateAnswer(answer, answer.isLiked === false ? undefined : false);
   }
 
-  private rate(msg: ChatMessageViewModel, like?: boolean): void {
-    this.apiService.rate(msg.id, like).subscribe(() => msg.isLiked = like);
+  private _rateAnswer(msg: ChatMessageViewModel, like: Optional<boolean>): void {
+    this._apiService.rateAnswer(msg.id, like).subscribe(() => msg.isLiked = like);
   }
 }

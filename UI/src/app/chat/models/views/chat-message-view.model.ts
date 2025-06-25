@@ -1,4 +1,5 @@
-import { isDefined } from '../../utils';
+import { Optional } from '../../../shared/types/optional.type';
+import { isDefined } from '../../../shared/utils';
 
 export interface ChatMessageResponse {
   Id: string;
@@ -13,7 +14,7 @@ export class ChatMessageViewModel {
   public readonly isUser: boolean = false;
   public readonly text: string = '';
   public readonly timestamp: Date = new Date();
-  public isLiked?: boolean;
+  public isLiked: Optional<boolean>;
 
   public constructor(response: ChatMessageResponse) {
     if (!isDefined(response)) {
