@@ -8,7 +8,7 @@ export class ChatMessageViewModel {
   public readonly timestamp: Date = new Date();
   public isLiked: Optional<boolean>;
 
-  public constructor(response: ChatMessageViewModel) {
+  public constructor(response?: ChatMessageViewModel) {
     if (!isDefined(response)) {
       return;
     }

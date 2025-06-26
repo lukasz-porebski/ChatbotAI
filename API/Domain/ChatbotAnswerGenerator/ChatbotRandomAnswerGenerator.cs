@@ -24,8 +24,6 @@ public class ChatbotRandomAnswerGenerator : IChatbotAnswerGenerator
             .OrderBy(_ => _random.Next())
             .First();
 
-        randomAnswerLength = AnswerLength.Long;
-
         string result;
         switch (randomAnswerLength)
         {

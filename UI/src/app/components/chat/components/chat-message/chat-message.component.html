@@ -6,9 +6,11 @@
       [class.prompt]="message().isUser"
     >
       <mat-card-content>
-        <p>
-          {{ message().text }}
-        </p>
+        @for (paragraph of paragraphs; track paragraph.id) {
+          <p>
+            {{ paragraph.text }}
+          </p>
+        }
       </mat-card-content>
       @if (!message().isUser && !hideButtons()) {
         <mat-card-actions>
@@ -17,7 +19,8 @@
           </button>
           <button matIconButton (click)="toggleDislike(message())">
             <mat-icon [class.disliked]="message().isLiked === false"
-              >thumb_down</mat-icon
+            >thumb_down
+            </mat-icon
             >
           </button>
         </mat-card-actions>

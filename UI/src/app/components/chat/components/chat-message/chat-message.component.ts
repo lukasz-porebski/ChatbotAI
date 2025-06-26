@@ -1,4 +1,4 @@
-import { Component, inject, input } from '@angular/core';
+import { Component, effect, inject, input } from '@angular/core';
 import {
   MatCard,
   MatCardActions,
@@ -8,6 +8,7 @@ import { ChatMessageViewModel } from '../../models/views/chat-message-view.model
 import { MatIcon } from '@angular/material/icon';
 import { Optional } from '../../../../../shared/types/optional.type';
 import { ChatAPIService } from '../../../../services/chat-api.service';
+import { ChatMessageParagraph } from './models/chat-message-paragraph';
 
 @Component({
   selector: 'app-chat-message',
@@ -19,7 +20,17 @@ export class ChatMessageComponent {
   public message = input.required<ChatMessageViewModel>();
   public hideButtons = input<boolean>(false);
 
+  public paragraphs: ChatMessageParagraph[] = [];
+
   private readonly _apiService = inject(ChatAPIService);
+
+  public constructor() {
+    effect(() => {
+      this.paragraphs = this.message()
+        .text.split('\n')
+        .map((value, index) => new ChatMessageParagraph(index, value));
+    });
+  }
 
   public toggleLike(answer: ChatMessageViewModel): void {
     this._rateAnswer(answer, answer.isLiked ? undefined : true);
