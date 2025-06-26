@@ -1,10 +1,11 @@
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { ChatAPIService } from './chat-api.service';
 import {
   AfterViewChecked,
   Component,
   ElementRef,
   inject,
+  OnDestroy,
   OnInit,
   viewChild,
 } from '@angular/core';
@@ -34,12 +35,12 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
 })
-export class ChatComponent implements OnInit, AfterViewChecked {
+export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   public messagesContainer =
     viewChild.required<ElementRef>('messagesContainer');
 
   public get isSending(): boolean {
-    return isDefined(this._streamSub);
+    return isDefined(this._generatedAnswerSub);
   }
 
   public isInitialized = false;
@@ -49,64 +50,63 @@ export class ChatComponent implements OnInit, AfterViewChecked {
 
   private readonly _apiService = inject(ChatAPIService);
 
-  private _streamSub: Optional<Subscription>;
+  private _generatedAnswerSub: Optional<Subscription>;
 
-  public ngOnInit(): void {
-    this._apiService.getHistory().subscribe((history) => {
-      this.history = history;
-      this.isInitialized = true;
-    });
+  public async ngOnInit(): Promise<void> {
+    this.history = await firstValueFrom(this._apiService.getHistory());
+    this.isInitialized = true;
   }
 
   public ngAfterViewChecked(): void {
     this._scrollMessagesContainerToBottom();
   }
 
-  public send(): void {
-    this._apiService
-      .addMessage(null, true, this.prompt)
-      .subscribe((message) => {
-        this.history.push(message);
-
-        this._streamSub = this._apiService
-          .generateAnswer(this.prompt)
-          .subscribe({
-            next: (msg) => {
-              this.generatedAnswer = msg;
-            },
-            complete: () => {
-              this._streamSub = undefined;
-              this._apiService
-                .addMessage(
-                  this.generatedAnswer!.id,
-                  false,
-                  this.generatedAnswer!.text,
-                )
-                .subscribe(() => {
-                  this.history.push(this.generatedAnswer!);
-                  this.generatedAnswer = undefined;
-                });
-            },
-          });
-        this.prompt = '';
-      });
+  public ngOnDestroy(): void {
+    this._generatedAnswerSub?.unsubscribe();
   }
 
-  public cancel(): void {
-    if (isDefined(this._streamSub)) {
-      this._streamSub.unsubscribe();
-      this._streamSub = undefined;
-      this._apiService
-        .addMessage(this.generatedAnswer!.id, false, this.generatedAnswer!.text)
-        .subscribe(() => {
-          this.history.push(this.generatedAnswer!);
-          this.generatedAnswer = undefined;
-        });
-    }
+  public async send(): Promise<void> {
+    const addedPrompt = await firstValueFrom(
+      this._apiService.addMessage(null, true, this.prompt),
+    );
+    this.history.push(addedPrompt);
+
+    this._generatedAnswerSub = this._apiService
+      .generateAnswer(this.prompt)
+      .subscribe({
+        next: (answer) => (this.generatedAnswer = answer),
+        complete: async () => {
+          this._generatedAnswerSub = undefined;
+          await this._saveGeneratedAnswer();
+        },
+      });
+    this.prompt = '';
+  }
+
+  public async cancel(): Promise<void> {
+    this._generatedAnswerSub?.unsubscribe();
+    this._generatedAnswerSub = undefined;
+    await this._saveGeneratedAnswer();
   }
 
   private _scrollMessagesContainerToBottom(): void {
     const element = this.messagesContainer().nativeElement;
     element.scrollTop = element.scrollHeight;
+  }
+
+  private async _saveGeneratedAnswer(): Promise<void> {
+    if (!isDefined(this.generatedAnswer)) {
+      return;
+    }
+
+    await firstValueFrom(
+      this._apiService.addMessage(
+        this.generatedAnswer.id,
+        false,
+        this.generatedAnswer.text,
+      ),
+    );
+    this.history.push(this.generatedAnswer);
+    this.generatedAnswer = undefined;
   }
 }

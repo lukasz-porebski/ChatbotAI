@@ -25,12 +25,12 @@
 .prompt-container {
   height: 20%;
   overflow: overlay;
-}
 
-.input {
-  width: 90%;
-}
+  mat-form-field {
+    width: 90%;
+  }
 
-.send-stop {
-  width: 10%;
+  button {
+    width: 10%;
+  }
 }
