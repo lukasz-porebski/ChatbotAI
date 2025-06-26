@@ -1,5 +1,13 @@
 # ChatbotAI
-## 1. ChatGPT
+
+## 1. URL
+API: https://localhost:7202
+
+UI: http://localhost:4200
+
+Baza danych: (localdb)\\MSSQLLocalDB
+
+## 2. Użycie ChatGPT
 Szablon aplikacji został wygenerowany przez ChatGPT. Poniżej podany prompt:
 
 ```
