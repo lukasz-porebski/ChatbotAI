@@ -15,14 +15,17 @@ export interface ChatMessage {
 ### 2. ChatService (streaming + anulowanie) (streaming + anulowanie)
 
 ```ts
-@Injectable({ providedIn: "root" })
+
+@Injectable({providedIn: "root"})
 export class ChatService {
   private base = "/api/chat";
-  constructor(private http: HttpClient) {}
+
+  constructor(private http: HttpClient) {
+  }
 
   stream(prompt: string): Observable<ChatMessage> {
     return new Observable((sub) => {
-      const req = this.http.post(`${this.base}/stream`, { prompt }, { responseType: "text", observe: "body" });
+      const req = this.http.post(`${this.base}/stream`, {prompt}, {responseType: "text", observe: "body"});
       const subReq = req.subscribe({
         next: (chunk) => {
           const parts = chunk.split(/^data: /gm);
@@ -48,7 +51,8 @@ export class ChatService {
 ### 3. ChatComponent (HTML)
 
 ```html
-<div class="chat-container">
+
+<div class="app-container">
   <div *ngFor="let msg of history">
     <mat-card [ngClass]="msg.isUser ? 'user' : 'bot'">
       <pre>{{ msg.text }}</pre>
@@ -76,7 +80,9 @@ export class ChatComponent implements OnInit {
   prompt = "";
   streamSub: Subscription;
 
-  constructor(private svc: ChatService) {}
+  constructor(private svc: ChatService) {
+  }
+
   ngOnInit() {
     this.loadHistory();
   }
@@ -105,9 +111,11 @@ export class ChatComponent implements OnInit {
   toggleLike(msg: ChatMessage) {
     this.rate(msg, true);
   }
+
   toggleDislike(msg: ChatMessage) {
     this.rate(msg, false);
   }
+
   private rate(msg: ChatMessage, like: boolean) {
     this.svc.rate(msg.id, like).subscribe(() => (msg.isLiked = like));
   }

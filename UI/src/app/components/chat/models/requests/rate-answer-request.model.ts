@@ -1,4 +1,4 @@
-import { Optional } from '../../../shared/types/optional.type';
+import { Optional } from '../../../../../shared/types/optional.type';
 
 export class RateAnswerRequest {
   public constructor(

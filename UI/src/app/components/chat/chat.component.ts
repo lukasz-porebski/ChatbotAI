@@ -1,26 +1,25 @@
 import { firstValueFrom, Subscription } from 'rxjs';
-import { ChatAPIService } from './chat-api.service';
+import { ChatAPIService } from '../../services/chat-api.service';
 import {
   AfterViewChecked,
   Component,
   ElementRef,
   inject,
+  input,
   OnDestroy,
-  OnInit,
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatInput } from '@angular/material/input';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
-import { isDefined } from '../shared/utils';
+import { isDefined } from '../../../shared/utils';
 import { ChatMessageViewModel } from './models/views/chat-message-view.model';
 import { ChatMessageComponent } from './components/chat-message/chat-message.component';
-import { Optional } from '../shared/types/optional.type';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { Optional } from '../../../shared/types/optional.type';
 
 @Component({
-  selector: 'app-root',
+  selector: 'app-chat',
   imports: [
     FormsModule,
     MatIcon,
@@ -29,33 +28,26 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
     CdkTextareaAutosize,
     MatFormField,
     ChatMessageComponent,
-    MatProgressSpinner,
   ],
-  providers: [ChatAPIService],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
 })
-export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
+export class ChatComponent implements AfterViewChecked, OnDestroy {
   public messagesContainer =
     viewChild.required<ElementRef>('messagesContainer');
+
+  public history = input.required<ChatMessageViewModel[]>();
 
   public get isSending(): boolean {
     return isDefined(this._generatedAnswerSub);
   }
 
-  public isInitialized = false;
-  public history: ChatMessageViewModel[] = [];
   public generatedAnswer: Optional<ChatMessageViewModel>;
   public prompt = '';
 
   private readonly _apiService = inject(ChatAPIService);
 
   private _generatedAnswerSub: Optional<Subscription>;
-
-  public async ngOnInit(): Promise<void> {
-    this.history = await firstValueFrom(this._apiService.getHistory());
-    this.isInitialized = true;
-  }
 
   public ngAfterViewChecked(): void {
     this._scrollMessagesContainerToBottom();
@@ -69,7 +61,7 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     const addedPrompt = await firstValueFrom(
       this._apiService.addMessage(null, true, this.prompt),
     );
-    this.history.push(addedPrompt);
+    this.history().push(addedPrompt);
 
     this._generatedAnswerSub = this._apiService
       .generateAnswer(this.prompt)
@@ -106,7 +98,7 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
         this.generatedAnswer.text,
       ),
     );
-    this.history.push(this.generatedAnswer);
+    this.history().push(this.generatedAnswer);
     this.generatedAnswer = undefined;
   }
 }

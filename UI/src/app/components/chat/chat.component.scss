@@ -1,0 +1,17 @@
+.messages-container {
+  height: 80%;
+  overflow: overlay;
+}
+
+.prompt-container {
+  height: 20%;
+  overflow: overlay;
+
+  mat-form-field {
+    width: 90%;
+  }
+
+  button {
+    width: 10%;
+  }
+}

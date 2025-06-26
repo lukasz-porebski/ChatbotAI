@@ -1,0 +1,9 @@
+<div class="app-container">
+  @if (!isInitialized) {
+    <div class="loading">
+      <mat-spinner></mat-spinner>
+    </div>
+  } @else {
+    <app-chat [history]="history"></app-chat>
+  }
+</div>
