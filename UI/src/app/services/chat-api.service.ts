@@ -22,29 +22,6 @@ export class ChatAPIService {
       );
   }
 
-  public generateAnswer2(prompt: string): Observable<ChatMessageViewModel> {
-    return new Observable<ChatMessageViewModel>((observer) => {
-      const controller = new AbortController();
-
-      fetch(`${this._apiUrl}/generate-answer`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(new GenerateAnswerRequest(prompt)),
-        signal: controller.signal,
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
-
-          this.read2(response, observer);
-        })
-        .catch((err) => observer.error(err));
-
-      return () => controller.abort();
-    });
-  }
-
   public generateAnswer(prompt: string): Observable<ChatMessageViewModel> {
     return new Observable<ChatMessageViewModel>((observer) => {
       const controller = new AbortController();
@@ -62,36 +39,7 @@ export class ChatAPIService {
 
           const reader = response.body!.getReader();
           const decoder = new TextDecoder();
-
-          const read = (): void => {
-            reader
-              .read()
-              .then(({ done, value }) => {
-                if (done) {
-                  observer.complete();
-                  return;
-                }
-
-                // debugger;
-                const text = decoder.decode(value, { stream: true });
-                text.split('\n\n').forEach((block) => {
-                  if (block.startsWith('data:')) {
-                    try {
-                      const msg: ChatMessageViewModel = JSON.parse(
-                        block.substring(5),
-                      );
-                      observer.next(new ChatMessageViewModel(msg));
-                    } catch {
-                      // ignoruj nie-JSON-owe kawałki
-                    }
-                  }
-                });
-                read();
-              })
-              .catch((err) => observer.error(err));
-          };
-
-          read();
+          this._readStream(reader, decoder, response, observer);
         })
         .catch((err) => observer.error(err));
 
@@ -119,13 +67,12 @@ export class ChatAPIService {
     );
   }
 
-  private read2(
+  private _readStream(
+    reader: ReadableStreamDefaultReader<Uint8Array<ArrayBufferLike>>,
+    decoder: TextDecoder,
     response: Response,
     observer: Subscriber<ChatMessageViewModel>,
   ): void {
-    const reader = response.body!.getReader();
-    const decoder = new TextDecoder();
-
     reader
       .read()
       .then(({ done, value }) => {
@@ -133,18 +80,10 @@ export class ChatAPIService {
           observer.complete();
           return;
         }
-        const text = decoder.decode(value, { stream: true });
-        text.split('\n\n').forEach((block) => {
-          if (block.startsWith('data:')) {
-            try {
-              const msg: ChatMessageViewModel = JSON.parse(block.substring(5));
-              observer.next(new ChatMessageViewModel(msg));
-            } catch {
-              // ignoruj nie-JSON-owe kawałki
-            }
-          }
-        });
-        this.read2(response, observer);
+        const json = decoder.decode(value, { stream: true });
+        const msg: ChatMessageViewModel = JSON.parse(json);
+        observer.next(new ChatMessageViewModel(msg));
+        this._readStream(reader, decoder, response, observer);
       })
       .catch((err) => observer.error(err));
   }

@@ -8,7 +8,7 @@ import { ChatMessageViewModel } from '../../models/views/chat-message-view.model
 import { MatIcon } from '@angular/material/icon';
 import { Optional } from '../../../../../shared/types/optional.type';
 import { ChatAPIService } from '../../../../services/chat-api.service';
-import { ChatMessageParagraph } from './models/chat-message-paragraph';
+import { ChatMessageParagraph } from './models/chat-message-paragraph.model';
 
 @Component({
   selector: 'app-chat-message',

@@ -27,13 +27,13 @@ public class ChatController(IMediator mediator) : ControllerBase
 
         var options = new JsonSerializerOptions
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
         await foreach (var chatMessage in mediator.CreateStream(request, cancellationToken))
         {
             var json = JsonSerializer.Serialize(chatMessage, options);
-            await Response.WriteAsync($"data:{json}\n\n", cancellationToken);
+            await Response.WriteAsync(json, cancellationToken);
             await Response.Body.FlushAsync(cancellationToken);
         }
     }

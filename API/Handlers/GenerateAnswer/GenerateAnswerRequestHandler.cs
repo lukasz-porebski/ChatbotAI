@@ -20,8 +20,8 @@ public class GenerateAnswerRequestHandler(IChatbotAnswerGenerator chatbotAnswerG
 
         foreach (var character in answer)
         {
-            message.SetText(stringBuilder.ToString());
             stringBuilder.Append(character);
+            message.SetText(stringBuilder.ToString());
 
             await Task.Delay(30, cancellationToken);
             yield return message;
