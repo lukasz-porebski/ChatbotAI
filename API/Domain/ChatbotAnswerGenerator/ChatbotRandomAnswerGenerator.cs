@@ -51,7 +51,7 @@ public class ChatbotRandomAnswerGenerator : IChatbotAnswerGenerator
     private string GenerateRandomParagraph(int minNumbersOfSentences, int maxNumbersOfSentences)
     {
         var randomSentences = _sentences.OrderBy(_ => _random.Next()).ToArray();
-        return string.Join(" ", randomSentences.Take(_random.Next(minNumbersOfSentences, maxNumbersOfSentences) + 1));
+        return string.Join(" ", randomSentences.Take(_random.Next(minNumbersOfSentences, maxNumbersOfSentences + 1)));
     }
 
     private enum AnswerLength

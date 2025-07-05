@@ -17,7 +17,7 @@ public class ChatMessage
 
     public Guid Id { get; private set; }
     public bool IsUser { get; private set; }
-    public string Text { get; private set; }
+    public string Text { get; private set; } = string.Empty;
     public DateTime Timestamp { get; private set; }
     public bool? IsLiked { get; private set; }
 
