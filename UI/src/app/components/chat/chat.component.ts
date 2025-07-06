@@ -38,7 +38,7 @@ export class ChatComponent implements AfterViewChecked, OnDestroy {
 
   public history = input.required<ChatMessageViewModel[]>();
 
-  public get isSending(): boolean {
+  public get isAnswerReceiving(): boolean {
     return isDefined(this._generatedAnswerSub);
   }
 

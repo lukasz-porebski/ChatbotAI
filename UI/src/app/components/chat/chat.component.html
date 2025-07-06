@@ -6,27 +6,30 @@
   @if (generatedAnswer) {
     <app-chat-message
       [message]="generatedAnswer"
-      [hideButtons]="isSending"
+      [hideButtons]="isAnswerReceiving"
     ></app-chat-message>
   }
 </div>
+
 <div class="prompt-container">
   <mat-form-field>
-        <textarea
-          matInput
-          cdkTextareaAutosize
-          placeholder="Zapytaj o cokolwiek"
-          [(ngModel)]="prompt"
-        >
-        </textarea>
+      <textarea
+        matInput
+        cdkTextareaAutosize
+        placeholder="Zapytaj o cokolwiek"
+        [(ngModel)]="prompt"
+      >
+      </textarea>
   </mat-form-field>
-  @if (!isSending) {
-    <button matIconButton class="send-stop" (click)="send()">
+
+  @if (!isAnswerReceiving) {
+    <button matIconButton (click)="send()">
       <mat-icon>arrow_upward</mat-icon>
     </button>
   }
-  @if (isSending) {
-    <button matIconButton class="send-stop" (click)="cancel()">
+
+  @if (isAnswerReceiving) {
+    <button matIconButton (click)="cancel()">
       <mat-icon>stop_circle</mat-icon>
     </button>
   }
